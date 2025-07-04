@@ -42,11 +42,12 @@ def get_repo_url(name, version, retries=3, timeout=5):
 
 def _get_github_release_url(repo_url, version):
     owner_repo = urlparse(repo_url).path.strip('/')
+    repo_url = requests.head(repo_url, allow_redirects=True).url
     base = f'https://api.github.com/repos/{owner_repo}/releases/tags'
     for tag in (version, f'v{version}'):
         r = requests.get(f'{base}/{tag}', timeout=5)
         if r.status_code == 200:
-            return f'{repo_url}/releases/tag/{tag}'
+            return f'{repo_url}/archive/refs/tags/{tag}.zip'
     return None
 
 def get_repo_url_from_purl(purl_str, **kwargs):
@@ -55,4 +56,4 @@ def get_repo_url_from_purl(purl_str, **kwargs):
         return None
     return get_repo_url(purl.name, purl.version, **kwargs)
 
-print(get_repo_url_from_purl('pkg:pypi/fastapi@0.1.16'))
+print(get_repo_url_from_purl('pkg:pypi/pandas@2.3.0'))
