@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: db_reports
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres_data/init.sql:/docker-entrypoint-initdb.d/init.sql  
+
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: web_app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
