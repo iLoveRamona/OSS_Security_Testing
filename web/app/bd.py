@@ -2,10 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import  Column, Integer, String
 import requests
-from dotenv import dotenv_values
-
-config = dotenv_values(".env")
-
+from config import config
 ip_server = "51.250.44.45:8080"
 
 
@@ -41,7 +38,13 @@ db = SessionLocal()
 def get_report(purl):
     report = db.query(Reports).filter(Reports.purl == purl).all()
     if len(report):
-        return report[0].report
+        report = report[0]
+        if report.status == 0:
+            return "Wait"
+        if report.status == 1:
+            return report[0].report
+        if report.status == -1:
+            return "Not existst"    
     url = f"http://{ip_server}/api/v2/dags/oss_flow/dagRuns"
     headers = {"Authorization": f"Bearer {get_jwt()}",
                "Content-Type": "application/json"}

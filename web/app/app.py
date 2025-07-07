@@ -1,7 +1,8 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from bd import get_report
+from fastapi import FastAPI, Body, Header
+from fastapi.responses import HTMLResponse, HTTPResponse
+from bd import get_report, add_report
 import verifikation as verifikation
+from config import config
  
 app = FastAPI()
 
@@ -9,7 +10,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    html_content = "<h2>Hello OSS sequryty testing!</h2>"
+    html_content = "<h2>Hello OSS security testing!</h2>"
     return HTMLResponse(content=html_content)
 
 
@@ -28,3 +29,11 @@ def read_root(manager: str, index: str, name: str, version: str):
     purl = f"{manager}:{index}/{name}@{version}"
     html_content = get_report(purl)
     return HTMLResponse(content=html_content)
+
+
+@app.post("/api/airflow")
+def create_person(data = Body()):
+    if data['secret'] == config['passwd']:
+        add_report(data["purl"], data["report"])
+        return HTTPResponse(200)
+    return HTTPResponse(401)
