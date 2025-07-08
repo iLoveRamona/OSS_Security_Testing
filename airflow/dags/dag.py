@@ -207,4 +207,4 @@ with DAG(
 
 
     get_url_task >> download_task >> scan_task >> callback_task
-    get_url_task >> callback_task
+    get_url_task >> callback_task   
