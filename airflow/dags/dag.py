@@ -3,6 +3,19 @@ from datetime import datetime
 from airflow.operators.python import PythonVirtualenvOperator
 from airflow.decorators import task
 from airflow.models import Param
+from airflow.models import Variable
+url = Variable.get('web_url')
+secret = Variable.get('web_secret')
+def callback(report, url, secret, purl):
+    import requests
+    import json
+    payload = {}
+    print(report := report.replace("'", '"'))
+    payload['report'] = json.loads(report) 
+    payload['secret'] = secret
+    payload['purl'] = purl
+    requests.post(url + 'api/airflow', json=payload)
+
 
 def get_repo_url_from_purl(purl, **kwargs):
 
@@ -65,13 +78,13 @@ def get_repo_url_from_purl(purl, **kwargs):
                 return f'{repo_url}/archive/refs/tags/{tag}.zip'
         return None
 
-    purl = PackageURL.from_string(purl)
-    if purl.type != 'pypi' or not purl.name or not purl.version:
+    purl_obj = PackageURL.from_string(purl)
+    if purl_obj.type != 'pypi' or not purl_obj.name or not purl_obj.version:
         return None
     
-    repo_url = get_repo_url(purl.name, purl.version)
+    repo_url = get_repo_url(purl_obj.name, purl_obj.version)
     
-    return repo_url
+    return repo_url, purl
 
 
 def download(repo_url):
@@ -90,8 +103,8 @@ def download(repo_url):
     print('!!!')
 
     # Подготовка путей
-    zip_path = Path("./target.zip")
-    extract_dir = Path("./extracted")
+    zip_path = Path("/tmp/target.zip")
+    extract_dir = Path("/tmp/extracted")
     
     # Очистка старых файлов
     shutil.rmtree(extract_dir, ignore_errors=True)
@@ -100,8 +113,9 @@ def download(repo_url):
     # Скачивание архива
     curl_cmd = f"curl -s -L -o {zip_path} {repo_url}"
     curl_result = subprocess.run(
-        curl_cmd, shell=True, capture_output=True, text=True, timeout=60
+        curl_cmd, shell=True, capture_output=True, text=True
     )
+    
     print(curl_result)
     if curl_result.returncode != 0:
         raise RuntimeError(f"Curl error: {curl_result.stderr}")
@@ -109,13 +123,18 @@ def download(repo_url):
     # Распаковка
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_dir)
-    
+
+    curl_result = subprocess.run(
+        f"ls {extract_dir}", shell=True, capture_output=True, text=True
+    )
+    print(curl_result)
     return str(extract_dir)
 
 def scan(target_path):
     import subprocess
     result = subprocess.run(
-        ["sudo", "bandit", "-r", str(target_path), "-f", "json"],
+        f"bandit -r {str(target_path)} -f json",
+        shell=True,
         capture_output=True,
         text=True
     )
@@ -130,6 +149,9 @@ def scan(target_path):
         "error": result.stderr,
         "return_code": result.returncode
     }
+
+
+
 
 with DAG(
     'oss_flow',
@@ -155,7 +177,7 @@ with DAG(
         do_xcom_push=True,
         requirements=["requests==2.28.1"],
         op_kwargs={
-            'repo_url': "{{ ti.xcom_pull(task_ids='get_url_from_purl') }}"
+            'repo_url': "{{ ti.xcom_pull(task_ids='get_url_from_purl')[0] }}"
         },
     )
     scan_task = PythonVirtualenvOperator(
@@ -169,5 +191,20 @@ with DAG(
         },
     )
 
-    get_url_task >> download_task >> scan_task
-    
+    callback_task = PythonVirtualenvOperator(
+        task_id="callback_task",
+        python_callable=callback,
+        system_site_packages=False,
+        do_xcom_push=True,
+        requirements=["requests==2.28.1"],
+        op_kwargs={
+            'report': "{{ ti.xcom_pull(task_ids='scan_task') }}",
+             'url' : url, 
+             'secret': secret,
+             'purl': "{{ ti.xcom_pull(task_ids='get_url_from_purl')[1] }}"
+        },
+    )
+
+
+    get_url_task >> download_task >> scan_task >> callback_task
+    get_url_task >> callback_task
