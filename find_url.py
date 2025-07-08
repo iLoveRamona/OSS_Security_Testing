@@ -1,59 +1,27 @@
-import os
 import requests
-from time import sleep
-from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 from packageurl import PackageURL
 
-def get_repo_url(name, version, retries=3, timeout=5):
-    name = name.replace('_','-').lower()
-    index = os.getenv('PYPI_INDEX_URL','https://pypi.org')
-    url = f"{index}/pypi/{name}/{version}/json"
-    backoff = 1
-    for _ in range(retries):
-        try:
-            r = requests.get(url, timeout=timeout)
-            if r.status_code == 200:
-                data = r.json()
-                break
-            if 500 <= r.status_code < 600:
-                sleep(backoff); backoff *= 2
-            else:
-                return None
-        except requests.RequestException:
-            sleep(backoff); backoff *= 2
-    else:
-        return None
-
-    info = data['info']
-    urls = info.get('project_urls') or {}
-    homepage = info.get('home_page')
-
-    for provider in ('github.com','gitlab.com','bitbucket.org'):
-        for u in urls.values():
-            if provider in urlparse(u).netloc:
-                repo = u.split('/archive/')[0].split('.tar.gz')[0]
-                if 'github.com' in provider:
-                    rel = _get_github_release_url(repo, version)
-                    return rel or repo
-                return repo
-    if urls:
-        return next(iter(urls.values()))
-    return homepage
-
-def _get_github_release_url(repo_url, version):
-    owner_repo = urlparse(repo_url).path.strip('/')
-    repo_url = requests.head(repo_url, allow_redirects=True).url
-    base = f'https://api.github.com/repos/{owner_repo}/releases/tags'
-    for tag in (version, f'v{version}'):
-        r = requests.get(f'{base}/{tag}', timeout=5)
-        if r.status_code == 200:
-            return f'{repo_url}/archive/refs/tags/{tag}.zip'
-    return None
-
-def get_repo_url_from_purl(purl_str, **kwargs):
+def get_repo_url_from_purl(purl_str: str) -> str:
     purl = PackageURL.from_string(purl_str)
-    if purl.type != 'pypi' or not purl.name or not purl.version:
-        return None
-    return get_repo_url(purl.name, purl.version, **kwargs)
+    if purl.type != "pypi" or not purl.name or not purl.version:
+        raise ValueError("Ожидается PURL вида pkg:pypi/<name>@<version>")
 
-print(get_repo_url_from_purl('pkg:pypi/pandas@2.3.0'))
+    name = purl.name.lower().replace('_', '-')
+    version = purl.version
+    index_url = f"https://pypi.org/simple/{name}/"
+
+    response = requests.get(index_url)
+    if response.status_code != 200:
+        raise Exception(f"Не удалось получить список версий с {index_url}")
+    soup = BeautifulSoup(response.text, 'html.parser')
+    candidates = []
+    for link in soup.find_all('a'):
+        href = link.get('href', '')
+        if not href:
+            continue
+        if f"{name}-{version}.tar.gz" in href or f"{name}-{version}.zip" in href:
+            candidates.append(href)
+    if not candidates:
+        raise Exception(f"Не найден исходный архив для {purl_str}")
+    return candidates[0]
