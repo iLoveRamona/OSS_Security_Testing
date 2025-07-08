@@ -6,7 +6,7 @@ from config import config
  
 app = FastAPI()
 
-# pkg:index/requests@2.31.0
+# pkg:pypi/requests@2.31.0
 
 @app.get("/")
 def read_root():
@@ -28,6 +28,7 @@ def read_root(manager: str, index: str, name: str, version: str):
         return HTMLResponse(content=html_content)
     purl = f"{manager}:{index}/{name}@{version}"
     html_content = get_report(purl)
+    add_report()
     return HTMLResponse(content=html_content)
 
 
