@@ -1,19 +1,22 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 import asyncio
+from contextlib import asynccontextmanager
 
 from rabbit import add_request, get_request
 from db import get_report
 import verification
 from config import config
 
- 
 app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(get_request())
+    yield
 
-asyncio.run(get_request)
-
+    
 @app.get("/")
 def read_root():
     html_content = "<h2>Hello OSS security testing!</h2>"
