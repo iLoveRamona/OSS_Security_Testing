@@ -26,11 +26,3 @@ def read_root(manager: str, index: str, name: str, version: str):
     if html_content == "added now":
         add_request(purl)
     return HTMLResponse(content=html_content)
-
-
-@app.post("/api/airflow")
-def create_person(data = Body()):
-    if data['secret'] == config['passwd']:
-        add_report(data["purl"], data["report"])
-        return HTTPResponse(200)
-    return HTTPResponse(401)
