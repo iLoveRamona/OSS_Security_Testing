@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Устанавливаем зависимости Python
+RUN apt update && apt install -y curl
 RUN pip install --no-cache-dir -r requirements.txt
     # добавьте другие зависимости, которые использует ваш код
 

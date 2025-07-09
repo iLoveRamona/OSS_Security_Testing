@@ -13,15 +13,20 @@ from find_url import get_repo_url
 from scan import scan_repo
 from download import download_repo
 
-def send_message(message):
-    credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-            host=RABBITMQ_HOST, port=5672,
-            credentials=credentials))
-    channel = connection.channel()
-    channel.basic_publish(exchange='airflow', routing_key='end', body=json.dumps(message))
-    connection.close()
+
+def callback(report, purl):
+    payload = {
+        'report': report,
+        'passwd': WEB_SECRET,
+        'purl': purl,
+        'user': WEB_USER
+    }
+    try:
+        response = requests.post(f"{WEB_URL}/api/v1/report", json=payload)
+        response.raise_for_status()
+        print(f"Report for {purl} sent successfully")
+    except requests.RequestException as e:
+        print(f"Failed to send report for {purl}: {e}")
 
 def process_purl(purl_str):
     """Обработка PURL"""
@@ -58,7 +63,7 @@ def on_message(channel, method_frame, header_frame, body):
         
         print(f"Processing PURL: {purl}")
         res = process_purl(purl)
-        send_message(res)  
+        callback(res, purl)  
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         
     except Exception as e:
