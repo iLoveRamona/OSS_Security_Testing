@@ -10,7 +10,10 @@ from config import config
 app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
-await get_request()
+def blabla():
+    get_request()
+
+blabla()
 
 @app.get("/")
 def read_root():
