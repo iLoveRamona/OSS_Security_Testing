@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from db import get_report, add_report
 import verification
 from config import config
-from rebbit import add_request, get_request
+from rabbit import add_request, get_request
  
 app = FastAPI()
 

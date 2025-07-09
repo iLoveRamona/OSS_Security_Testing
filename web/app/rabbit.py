@@ -32,7 +32,7 @@ async def get_request():
         edit_report(data_dict["purl"], data_dict["report"])
         return body
 
-    channel.basic_consume(queue='airflow', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue='end', on_message_callback=callback, auto_ack=True)
 
     
     channel.start_consuming()
