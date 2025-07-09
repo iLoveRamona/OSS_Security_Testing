@@ -1,15 +1,10 @@
-# Используем официальный образ Python
-FROM python:3.9-slim
+FROM python:3.9-slim as base
 
-# Устанавливаем рабочую директорию
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
 WORKDIR /app
 
-# Копируем файлы проекта
-COPY . .
+COPY common ./common
 
-# Устанавливаем зависимости Python
-RUN pip install --no-cache-dir -r requirements.txt
-    # добавьте другие зависимости, которые использует ваш код
-
-# Запускаем скрипт
-CMD ["python", "worker.py"]
+RUN pip install --no-cache-dir -r common/requirements.txt
