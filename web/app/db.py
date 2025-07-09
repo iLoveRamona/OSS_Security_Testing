@@ -21,7 +21,7 @@ class Reports(Base):
     status = Column(Integer)
     report = Column(String)
     __table_args__ = (
-        Index('idx_purl', purl, unique=True)
+        Index('idx_purl', purl, unique=True),
     )
 
 Base.metadata.create_all(bind=engine)
