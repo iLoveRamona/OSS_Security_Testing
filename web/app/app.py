@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Body
 from fastapi.responses import HTMLResponse
 import bcrypt
+import json
 
 from rabbit import add_request
 from db import get_report, edit_report
@@ -19,7 +20,7 @@ def add_report(data = Body()):
     user = data["user"]
     if user and user in users and passwd and not bcrypt.checkpw(passwd.encode(), config["heshPass"].encode()):
         return "lol" 
-    edit_report(purl, data["report"])
+    edit_report(purl, json.dumps(data["report"]))
     return "ok"
 
 
