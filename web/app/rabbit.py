@@ -14,8 +14,10 @@ def add_request(purl):
             host=ip_server[:ip_server.index(':')],
             credentials=credentials))
     channel = connection.channel()
-
-    channel.basic_publish(exchange='airflow', routing_key='start', body=purl)
+    body = {
+        "purl":purl
+    }
+    channel.basic_publish(exchange='airflow', routing_key='start', body=json.dumps(body))
 
     connection.close()
 
