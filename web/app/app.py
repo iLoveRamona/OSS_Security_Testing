@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from rabbit import add_request, get_request
 
+from rabbit import add_request, get_request
 from db import get_report
 import verification
 from config import config
@@ -10,7 +10,7 @@ from config import config
 app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
-get_request()
+await get_request()
 
 @app.get("/")
 def read_root():

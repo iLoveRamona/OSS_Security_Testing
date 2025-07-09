@@ -37,7 +37,7 @@ async def get_request():
 
     channel.basic_consume(queue='airflow.end', on_message_callback=callback, auto_ack=True)
 
-    
+
     channel.start_consuming()
 
     connection.close()
