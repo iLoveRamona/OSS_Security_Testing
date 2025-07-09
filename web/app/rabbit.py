@@ -6,7 +6,7 @@ from db import edit_report
 
 username = config["airflowUser"]
 password = config["airflowPASS"]
-ip_server = config["ipSerwer"]
+ip_server = config["ipServer"]
 
 def add_request(purl):
     credentials = pika.PlainCredentials(username, password)

@@ -4,7 +4,7 @@ from sqlalchemy import  Column, Integer, String, Index
 
 from config import config
 
-ip_server = config["ipSerwer"]
+ip_server = config["ipServer"]
 
 
 SQLALCHEMY_DATABASE_URL = "postgresql://pg:root@db_reports/oss_security_testing"
