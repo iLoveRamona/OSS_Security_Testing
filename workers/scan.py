@@ -1,4 +1,5 @@
 import subprocess
+
 def scan_repo(target_path):
     """Сканирование репозитория с помощью Bandit"""
     result = subprocess.run(

@@ -14,9 +14,9 @@ spec:
     spec:
       containers:
       - name: worker
-        image: cr.yandex/crp2a0s6kjm2a7nidir9/worker
+        image: cr.yandex/crptukhsim5k1t3buhev/worker
         env:
-        - name: WORKER_ID  # Опционально: можно передавать переменные
+        - name: WORKER_ID
           valueFrom:
             fieldRef:
               fieldPath: metadata.name

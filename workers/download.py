@@ -1,14 +1,15 @@
 import shutil
 import zipfile
 from pathlib import Path
+import subprocess
 def download_repo(repo_url):
     """Скачивание репозитория"""
     if not repo_url:
         raise ValueError("Repository URL not provided")
     
     # Подготовка путей
-    zip_path = Path("/tmp/target.zip")
-    extract_dir = Path("/tmp/extracted")
+    zip_path = Path("./target.zip")
+    extract_dir = Path("./extracted")
     
     # Очистка старых файлов
     shutil.rmtree(extract_dir, ignore_errors=True)
