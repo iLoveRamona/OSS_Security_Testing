@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body, Header
-from fastapi.responses import HTMLResponse, HTTPResponse
+from fastapi.responses import HTMLResponse
 from db import get_report, add_report
 import verification
 from config import config
