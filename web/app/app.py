@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+import asyncio
 
 from rabbit import add_request, get_request
 from db import get_report
@@ -10,10 +11,8 @@ from config import config
 app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
-def blabla():
-    await get_request()
 
-blabla()
+asyncio.run(get_request)
 
 @app.get("/")
 def read_root():
