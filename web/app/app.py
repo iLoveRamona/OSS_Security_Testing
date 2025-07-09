@@ -11,7 +11,7 @@ app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
 def blabla():
-    get_request()
+    await get_request()
 
 blabla()
 
