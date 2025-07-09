@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Body, Header
 from fastapi.responses import HTMLResponse, HTTPResponse
-from bd import get_report, add_report
-import verifikation as verifikation
+from db import get_report, add_report
+import verification
 from config import config
+from rebbit import add_request, get_request
  
 app = FastAPI()
 
 # pkg:pypi/requests@2.31.0
+get_request()
 
 @app.get("/")
 def read_root():
@@ -16,19 +18,13 @@ def read_root():
 
 @app.get("/{manager}:{index}/{name}@{version}")
 def read_root(manager: str, index: str, name: str, version: str):
-    html_content = f"<h2>{manager}</h2>\n<h2>{index}</h2>\n<h2>{name}</h2>\n<h2>{version}</h2>\n"
-    if not verifikation.verification_manager(manager):
-        html_content = f"<h2>Мы поддерживаем только эти пакетные менеджеры: {" ".join([i for i in verifikation.managers])}</h2>"
-        return HTMLResponse(content=html_content)
-    if not verifikation.verification_index(index):
-        html_content = f"<h2>Мы поддерживаем только эти пакетные индексы: {" ".join([i for i in verifikation.package_index])}</h2>"
-        return HTMLResponse(content=html_content)
-    if not verifikation.verification_versrion(version):
-        html_content = f"<h2>В версии ошибка</h2>"
+    html_content = verification.verification_purl(manager, index, name, version)
+    if html_content:
         return HTMLResponse(content=html_content)
     purl = f"{manager}:{index}/{name}@{version}"
     html_content = get_report(purl)
-    add_report()
+    if html_content == "added now":
+        add_request(purl)
     return HTMLResponse(content=html_content)
 
 

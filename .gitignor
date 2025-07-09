@@ -1,5 +1,0 @@
-venv
-.*
-web.*
-postgres_data
-web.__*

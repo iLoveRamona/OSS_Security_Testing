@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import  Column, Integer, String
-import requests
 from config import config
-ip_server = "51.250.44.45:8080"
+ip_server = config["ipSerwer"]
 
 
 SQLALCHEMY_DATABASE_URL = "postgresql://pg:root@db_reports/oss_security_testing"
@@ -22,15 +21,6 @@ class Reports(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# def get_jwt():
-#     auth_url = f"http://{ip_server}/auth/token"
-#     credentials = {
-#         "username": "n.i.berukhov",
-#         "password": config["airflowPASS"]
-#     }
-#     response = requests.post(auth_url, json=credentials)
-#     return response.json()['access_token']
-
 
 SessionLocal = sessionmaker(autoflush=False, bind=engine)
 db = SessionLocal()
@@ -45,23 +35,22 @@ def get_report(purl):
             return report.report
         if report.status == -1:
             return "Not existst"
-    import pika
-    username = 'n.i.berukhov'
-    password = config["airflowPASS"]
-
-    credentials = pika.PlainCredentials(username, password)
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-            host=ip_server[:ip_server.index(':')],
-            credentials=credentials))
-    channel = connection.channel()
-
-    channel.basic_publish(exchange='airflow', routing_key='start', body=purl)
-
-    connection.close()
+    add_report(purl, 0, "")
+    return "added now"
 
 
 def add_report(purl, status, report):
     rep = Reports(psurl=purl, status=status, report=report)
     db.add(rep)
     db.commit()
+
+def edit_report(purl, report):
+    reports = db.query(Reports).filter(Reports.purl == purl).all()
+    reports = reports[0]
+    if reports.report:
+        reports.status = -1
+    else:
+        reports.status = 1
+        reports.report = report
+    db.commit()
+
