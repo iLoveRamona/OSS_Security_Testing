@@ -20,10 +20,9 @@ class Reports(Base):
     purl = Column(String, index=True)
     status = Column(Integer)
     report = Column(String)
-    __table_args__ = (
-        Index('idx_purl', purl, unique=True),
-    )
 
+
+reports_purl_index = Index('purl_idx', Reports.purl)
 Base.metadata.create_all(bind=engine)
 
 
