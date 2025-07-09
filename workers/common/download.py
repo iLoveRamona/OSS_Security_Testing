@@ -8,8 +8,8 @@ class RepoDownloader:
         if not repo_url:
             raise ValueError("Repository URL not provided")
 
-        zip_path = Path("/tmp/target.zip")
-        extract_dir = Path("/tmp/extracted")
+        zip_path = Path("./target.zip")
+        extract_dir = Path("./extracted")
 
         shutil.rmtree(extract_dir, ignore_errors=True)
         extract_dir.mkdir()

@@ -3,8 +3,8 @@ import json
 import os
 import requests
 from packageurl import PackageURL
-from find_url import get_repo_url
-import config
+from common.find_url import get_repo_url
+from common import config
 
 class Worker:
     def __init__(self, scanner, downloader):
@@ -13,12 +13,13 @@ class Worker:
 
     def callback(self, report, purl):
         payload = {
-            'report': json.loads(report.replace("'", '"')),
-            'secret': config.WEB_SECRET,
-            'purl': purl
-        }
+        'report': report,
+        'passwd': config.WEB_SECRET,
+        'purl': purl,
+        'user': config.WEB_USER
+    }
         try:
-            response = requests.post(f"{config.WEB_URL}api/airflow", json=payload)
+            response = requests.post(f"{config.WEB_URL}/api/v1/report", json=payload)
             response.raise_for_status()
             print(f"Report for {purl} sent successfully")
         except requests.RequestException as e:
@@ -33,10 +34,10 @@ class Worker:
         if not repo_url:
             raise ValueError("Could not determine repository URL")
 
-        repo_path = self.repo_downloader.download_repo(repo_url)
+        repo_path = self.downloader.download_repo(repo_url)
         scan_result = self.scanner.scan_repo(repo_path)
         self.callback(scan_result['output'], purl_str)
-        self.repo_downloader.remove_dir()
+        self.downloader.remove_dir()
         print('success')
         return scan_result
 
