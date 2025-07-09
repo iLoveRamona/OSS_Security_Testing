@@ -1,6 +1,5 @@
 import pika
 import json
-import os
 import requests
 from packageurl import PackageURL
 from common.find_url import get_repo_url
