@@ -40,7 +40,7 @@ def get_report(purl):
 
 
 def add_report(purl, status, report):
-    rep = Reports(psurl=purl, status=status, report=report)
+    rep = Reports(purl=purl, status=status, report=report)
     db.add(rep)
     db.commit()
 
