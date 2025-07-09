@@ -5,7 +5,7 @@ import bcrypt
 from rabbit import add_request
 from db import get_report, edit_report
 import verification
-from config import *
+from config import config, users
 
 app = FastAPI()
 
