@@ -42,7 +42,6 @@ def get_report(purl):
     add_report(purl, 0, "")
     return "added now"
 
-
 def add_report(purl, status, report):
     rep = Reports(purl=purl, status=status, report=report)
     db.add(rep)
@@ -51,9 +50,9 @@ def add_report(purl, status, report):
 def edit_report(purl, report):
     reports = db.query(Reports).filter(Reports.purl == purl).all()
     reports = reports[0]
-    if reports.report:
-        reports.status = -1
-    else:
+    if report:
         reports.status = 1
         reports.report = report
+    else:
+        reports.status = -1
     db.commit()
