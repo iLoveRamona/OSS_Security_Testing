@@ -17,7 +17,7 @@ def add_report(data = Body()):
     purl = data["purl"]
     passwd = data["passwd"]
     user = data["user"]
-    if user and user in users and passwd and not bcrypt.checkpw(passwd.encode(), config["heshPass"]):
+    if user and user in users and passwd and not bcrypt.checkpw(passwd.encode(), config["heshPass"].encode()):
         return "lol" 
     edit_report(purl, data["report"])
     return "ok"
