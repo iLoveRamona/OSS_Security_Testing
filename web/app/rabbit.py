@@ -1,7 +1,8 @@
 import pika
+import json
+
 from config import config
 from db import edit_report
-import json
 
 username = config["airflowUser"]
 password = config["airflowPASS"]

@@ -1,7 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy import  Column, Integer, String
+from sqlalchemy import  Column, Integer, String, Index
+
 from config import config
+
 ip_server = config["ipSerwer"]
 
 
@@ -18,6 +20,9 @@ class Reports(Base):
     purl = Column(String, index=True)
     status = Column(Integer)
     report = Column(String)
+    __table_args__ = (
+        Index('idx_purl', purl, unique=True)
+    )
 
 Base.metadata.create_all(bind=engine)
 
