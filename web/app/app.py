@@ -5,17 +5,16 @@ import bcrypt
 from rabbit import add_request
 from db import get_report, edit_report
 import verification
-from config import config
+from config import *
 
 app = FastAPI()
 
-users = {"rabbit"}
 
 # pkg:pypi/requests@2.31.0
 
-@app.post("/api/{manager}:{index}/{name}@{version}")
-def add_report(manager: str, index: str, name: str, version: str, data = Body()):
-    purl = f"{manager}:{index}/{name}@{version}"
+@app.post("/api/v1/report/")
+def add_report(data = Body()):
+    purl = data["purl"]
     passwd = data["passwd"]
     user = data["user"]
     if user and user in users and passwd and not bcrypt.checkpw(passwd.encode(), config["heshPass"]):

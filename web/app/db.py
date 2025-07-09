@@ -57,4 +57,3 @@ def edit_report(purl, report):
         reports.status = 1
         reports.report = report
     db.commit()
-
