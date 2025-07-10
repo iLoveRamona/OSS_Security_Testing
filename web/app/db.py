@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy import  Column, Integer, String, Index
+from sqlalchemy import  Column, Integer, String, Index, DateTime
+from sqlalchemy.sql import func
 
 from config import config
 
@@ -19,6 +20,7 @@ class Reports(Base):
     id = Column(Integer, primary_key=True, index=True)
     purl = Column(String, index=True)
     status = Column(Integer)
+    date = Column(DateTime(timezone=True), server_default=func.now())
     report = Column(String)
 
 
@@ -56,3 +58,7 @@ def edit_report(purl, report):
     else:
         reports.status = -1
     db.commit()
+
+def select_all():
+    reports = db.query(Reports).filter(Reports.status != -1).all()
+    return reports
