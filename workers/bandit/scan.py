@@ -16,14 +16,9 @@ class Scanner:
         if result.returncode not in [0, 1]:
             raise RuntimeError(f"Bandit failed: {result.stderr}")
         package = result.stdout
-        try:
-            package = json.loads(ast.literal_eval(package))
-            severities_package = package['metrics']['_totals']
-        except:
-            severities_package = {}
-            severities_package["SEVERITY.HIGH"] = 0
-            severities_package["SEVERITY.MEDIUM"] = 0
-            severities_package["SEVERITY.LOW"] = 0
+        print(package)
+        package = ast.literal_eval(package)
+        severities_package = package['metrics']['_totals']
         
         data = {
             "language": "python",
