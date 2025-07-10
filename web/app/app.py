@@ -42,5 +42,5 @@ def read_root(manager: str, index: str, name: str, version: str):
     return HTMLResponse(content=html_content)
 
 @app.get("/all_purl")
-def select_all():
+def select_all_rep():
     return select_all()
