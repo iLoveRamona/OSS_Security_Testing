@@ -6,10 +6,12 @@ import requests
 import time
 import re
 import secrets
+import json
 
 
 class Scanner:
-    def __init__(self):
+    def __init__(self, language="python"):
+        self.language = language
         self.token = config.SONAR_TOKEN
         self.host = config.SONAR_HOST_URL
 
@@ -40,7 +42,7 @@ class Scanner:
         )
 
         if result.returncode != 0:
-            raise RuntimeError(f"Semgrep failed: {result.stderr}")
+            raise RuntimeError(f"Sonarqube failed: {result.stderr}")
 
         match = re.search(r"ce/task\?id=([a-zA-Z0-9_-]+)", result.stdout)
         if not match:
@@ -51,11 +53,36 @@ class Scanner:
         print(f"Task id: {task_id}")
         self.wait_for_task_completion(task_id)
 
+        result = self.fetch_scan_result()
         return {
-            "output": self.fetch_scan_results(),
+            "output": self.get_results_json(result),
             "error": result.stderr,
             "return_code": result.returncode
         }
+
+    def get_results_json(self, output):
+        data = {
+            "language": self.language,
+            "scanner": "sonarqube"
+        }
+
+        vulners_count = {
+            "BLOCKER": 0,
+            "CRITICAL": 0,
+            "MAJOR": 0,
+            "BLOCKER": 0,
+            "CRITICAL": 0
+        }
+
+        results = json.loads(output)["issues"]
+        for result in results:
+            vulners_count[result["severity"]] += 1
+
+        data["low"] = vulners_count["BLOCKER"] + vulners_count["CRITICAL"]
+        data["medium"] = vulners_count["MAJOR"]
+        data["high"] = vulners_count["MINOR"] + vulners_count["INFO"]
+
+        return data
 
 
     def fetch_scan_result(self):

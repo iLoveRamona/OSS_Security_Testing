@@ -1,6 +1,6 @@
 import subprocess
 import ast
-import json
+
 class Scanner:
     def __init__(self):
         pass
@@ -19,7 +19,7 @@ class Scanner:
         print(package)
         package = ast.literal_eval(package)
         severities_package = package['metrics']['_totals']
-        
+
         data = {
             "language": "python",
             "scanner": "bandit",
