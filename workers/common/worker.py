@@ -36,11 +36,9 @@ class Worker:
         repo_path = self.repo_downloader.download_repo(repo_url)
         scan_result = self.scanner.scan_repo(repo_path)
         self.callback(scan_result['output'], purl_str)
-        name = purl_str.split("/")[1].split("@")[0]
-        
         self.repo_downloader.remove_dir()
         print('success')
-
+        
         return scan_result
 
     def on_message(self, channel, method_frame, header_frame, body):
