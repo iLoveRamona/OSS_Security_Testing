@@ -1,7 +1,9 @@
-FROM project-base as bandit
+FROM worker-base as bandit
 
-COPY . .
+WORKDIR /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . ./bandit
+
+RUN pip install --no-cache-dir -r ./bandit/requirements.txt
 
 CMD ["python", "main.py"]
