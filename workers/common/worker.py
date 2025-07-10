@@ -4,6 +4,7 @@ import requests
 from packageurl import PackageURL
 from common.find_url import get_repo_url
 from common import config
+from scanner import config as scanner_config
 
 class Worker:
     def __init__(self, scanner, downloader):
@@ -66,7 +67,7 @@ class Worker:
 
         channel.queue_declare(queue=config.RABBITMQ_QUEUE, durable=True)
         channel.basic_consume(
-            queue=config.RABBITMQ_QUEUE,
+            queue=scanner_config.RABBITMQ_QUEUE,
             on_message_callback=self.on_message,
             auto_ack=False
         )
