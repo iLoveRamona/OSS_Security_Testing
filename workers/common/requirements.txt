@@ -23,3 +23,6 @@ stevedore==5.4.1
 typing-inspection==0.4.1
 typing_extensions==4.14.0
 urllib3==2.5.0
+bs4==0.0.2
+beautifulsoup4==4.13.4
+soupsieve==2.7

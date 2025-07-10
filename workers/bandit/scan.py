@@ -5,7 +5,7 @@ class Scanner:
     def __init__(self):
         pass
 
-    def scan_repo(target_path):
+    def scan_repo(self, target_path):
         result = subprocess.run(
             f"bandit -q -r {target_path} -f json",
             shell=True,

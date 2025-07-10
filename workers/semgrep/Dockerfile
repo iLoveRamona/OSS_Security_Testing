@@ -1,4 +1,4 @@
-FROM worker-base as bandit
+FROM worker-base as semgrep
 
 WORKDIR /app
 
