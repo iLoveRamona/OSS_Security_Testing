@@ -34,6 +34,7 @@ class Worker:
         self.callback(scan_result['output'], purl_str)
         self.downloader.remove_dir()
         print('success')
+        
         return scan_result
 
     def on_message(self, channel, method_frame, header_frame, body):
