@@ -1,0 +1,86 @@
+# Persistent Volume Claim for SonarQube data (including H2 DB) and extensions
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarqube-data-pvc
+  namespace: sonarqube
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi # For data, logs, and the H2 database file
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarqube-extensions-pvc
+  namespace: sonarqube
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi # For plugins
+
+---
+# Deployment for the SonarQube server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube-server
+  namespace: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      # This initContainer is crucial for setting the required kernel parameter for Elasticsearch
+      initContainers:
+        - name: set-vm-max-map-count
+          image: busybox
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true # This requires elevated permissions
+      containers:
+        - name: sonarqube
+          image: sonarqube:community # Free Community Edition
+          ports:
+            - containerPort: 9000
+          # No database environment variables needed. SonarQube will default to H2.
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+            - name: sonarqube-extensions
+              mountPath: /opt/sonarqube/extensions
+      volumes:
+        - name: sonarqube-data
+          persistentVolumeClaim:
+            claimName: sonarqube-data-pvc
+        - name: sonarqube-extensions
+          persistentVolumeClaim:
+            claimName: sonarqube-extensions-pvc
+
+---
+# Service to expose SonarQube
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube-svc
+  namespace: sonarqube
+spec:
+  selector:
+    app: sonarqube
+  # Using NodePort to easily access it from outside the cluster for this demo.
+  # For production, you would use an Ingress Controller.
+  type: NodePort 
+  ports:
+    - protocol: TCP
+      port: 9000       # Port inside the cluster
+      targetPort: 9000 # Port on the pod
