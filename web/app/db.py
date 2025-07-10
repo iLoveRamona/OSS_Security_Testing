@@ -60,5 +60,5 @@ def edit_report(purl, report):
     db.commit()
 
 def select_all():
-    reports = db.query(Reports).filter(Reports.status != -1).all()
+    reports = db.query(Reports).filter(Reports.status != -1).order_by(Reports.date).all()
     return reports
