@@ -1,13 +1,11 @@
-FROM project-base as semgrep
+FROM worker-base as semgrep
 
-ARG SEMGREP_APP_TOKEN
+WORKDIR /app
 
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-
-RUN SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN semgrep login
+COPY . ./scanner
 
 CMD ["python", "main.py"]
