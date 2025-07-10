@@ -1,4 +1,4 @@
-from bandit.scan import Scanner
+from scanner.scan import Scanner
 from common.download import RepoDownloader
 from common.worker import Worker
 
