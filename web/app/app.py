@@ -4,7 +4,7 @@ import bcrypt
 import json
 
 from rabbit import add_request
-from db import get_report, edit_report
+from db import get_report, edit_report, select_all
 import verification
 from config import config, users
 
@@ -40,3 +40,7 @@ def read_root(manager: str, index: str, name: str, version: str):
     if html_content == "added now":
         add_request(purl)
     return HTMLResponse(content=html_content)
+
+@app.get("/all_purl")
+def select_all_rep():
+    return select_all()
